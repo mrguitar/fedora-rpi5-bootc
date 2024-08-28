@@ -13,7 +13,7 @@ Getting fedora-bootc to work on the RPi4 is super easy and straightforward. [Thi
 
 
 ## To Do:
-- Figure out how the [premade images] (https://rpmfusion.org/Howto/RaspberryPi) are booting and how to recreate that in a bootc environment
+- Figure out how the [premade images](https://rpmfusion.org/Howto/RaspberryPi) are booting and how to recreate that in a bootc environment
 - Complete firmware sections of the Makefile
 - Create a `make all` (or similar) to create a fully fuctional image ready to dd to an SD card
 - Document resizing the image / filesystem
