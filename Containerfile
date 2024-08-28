@@ -19,10 +19,23 @@ RUN set -eu; mkdir -p /usr/ssh && \
     echo 'AuthorizedKeysFile /usr/ssh/%u.keys .ssh/authorized_keys .ssh/authorized_keys2' >> /etc/ssh/sshd_config.d/30-auth-system.conf && \
     echo ${SSHPUBKEY} > /usr/ssh/root.keys && chmod 0600 /usr/ssh/root.keys
 
-#Install the rpi kernel & remove the default kernel
-RUN dnf -y install https://download.copr.fedorainfracloud.org/results/dwrobel/kernel-rpi/fedora-40-aarch64/07799649-kernel-rpi4/kernel-rpi4-{,core-,modules-,modules-extra-}6.6.42-1.rpi4.fc40.aarch64.rpm && \
-dnf clean all && \
-rpm -e kernel{,-core,-modules,-modules-core}
+# Install the rpi kernel & remove the default kernel
+WORKDIR /rpms
+RUN dnf -y install createrepo curl
+RUN curl -O https://download.copr.fedorainfracloud.org/results/dwrobel/kernel-rpi/fedora-40-aarch64/07799649-kernel-rpi4/kernel-rpi4-6.6.42-1.rpi4.fc40.aarch64.rpm \
+    -O https://download.copr.fedorainfracloud.org/results/dwrobel/kernel-rpi/fedora-40-aarch64/07799649-kernel-rpi4/kernel-rpi4-core-6.6.42-1.rpi4.fc40.aarch64.rpm \
+    -O https://download.copr.fedorainfracloud.org/results/dwrobel/kernel-rpi/fedora-40-aarch64/07799649-kernel-rpi4/kernel-rpi4-modules-6.6.42-1.rpi4.fc40.aarch64.rpm \
+    -O https://download.copr.fedorainfracloud.org/results/dwrobel/kernel-rpi/fedora-40-aarch64/07799649-kernel-rpi4/kernel-rpi4-modules-extra-6.6.42-1.rpi4.fc40.aarch64.rpm
+RUN createrepo /rpms
+RUN echo -e \
+    "[localrepo]\nname=Local Repository\nbaseurl=file:///rpms\nenabled=1\ngpgcheck=0" \
+    > /etc/yum.repos.d/localrepo.repo
+RUN rpm-ostree override replace /rpms/kernel-rpi4-6.6.42-1.rpi4.fc40.aarch64.rpm \
+    /rpms/kernel-rpi4-core-6.6.42-1.rpi4.fc40.aarch64.rpm \
+    /rpms/kernel-rpi4-modules-6.6.42-1.rpi4.fc40.aarch64.rpm \
+    /rpms/kernel-rpi4-modules-extra-6.6.42-1.rpi4.fc40.aarch64.rpm
+
+RUN dnf clean all
 
 #delete the prior initrd
 RUN rm -rdf /usr/lib/modules/6.10*
