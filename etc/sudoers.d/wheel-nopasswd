@@ -1,0 +1,4 @@
+# Enable passwordless sudo for the wheel group
+%wheel        ALL=(ALL)       NOPASSWD: ALL
+
+
